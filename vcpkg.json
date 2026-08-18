@@ -1,0 +1,9 @@
+{
+  "name": "trading-system",
+  "version": "1.0.0",
+  "dependencies": [
+    "jwt-cpp",
+    "sqlite3",
+    "nlohmann-json"
+  ]
+}

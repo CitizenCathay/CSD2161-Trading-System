@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markets - TradeFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            600: '#475569',
+                        },
+                        trade: {
+                            green: '#10b981',
+                            red: '#ef4444',
+                            accent: '#3b82f6'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.8);
+            border-radius: 3px;
+        }
+        .market-row:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .favorite-btn.active {
+            color: #fbbf24;
+            fill: currentColor;
+        }
+        .tab-active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+        .live-indicator {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .mini-chart {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 0;
+        }
+        .sparkline-up {
+            stroke: #10b981;
+        }
+        .sparkline-down {
+            stroke: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-white overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">TradeFlow</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-300 hover:text-white transition">Home</a>
+                    <a href="markets.html" class="text-blue-400 hover:text-white transition">Markets</a>
+                    <a href="portfolio.html" class="text-gray-300 font-medium">Portfolio</a>
+                    <a href="index.html#pricing" class="text-gray-300 hover:text-white transition">Pricing</a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <div id="nav-wallet" class="flex items-center space-x-2 px-3 py-1 rounded-full bg-dark-800 border border-gray-700">
+                        <i data-lucide="wallet" class="w-4 h-4 text-gray-400"></i>
+                        <span id="nav-balance" class="text-sm font-medium">$0.00</span>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-dark-800 border border-gray-700 flex items-center justify-center hover:bg-dark-700 transition">
+                        <i data-lucide="bell" class="w-4 h-4 text-gray-400"></i>
+                    </button>
+                    <div class="relative">
+                        <a id="nav-signin" href="/login" class="hidden px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">Sign In</a>
+                        <button id="profile-button" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold text-sm" type="button">
+                            <span id="profile-initials">?</span>
+                        </button>
+                        <div id="profile-menu" class="hidden absolute right-0 mt-3 w-56 glass rounded-xl border border-gray-700/50 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-gray-700/50">
+                                <p class="text-xs text-gray-500">Signed in as</p>
+                                <p id="profile-username" class="text-sm font-semibold text-white truncate">-</p>
+                            </div>
+                            <div class="py-2">
+                                <a href="portfolio.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-800/60 hover:text-white transition">Portfolio</a>
+                                <a href="/trade" class="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-800/60 hover:text-white transition">Trade</a>
+                                <button id="logout-button" class="w-full text-left px-4 py-2 text-sm text-red-200 hover:bg-red-500/10 transition" type="button">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-gray-700">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="index.html" class="block py-2 text-gray-300 hover:text-white">Home</a>
+                <a href="portfolio.html" class="block py-2 text-blue-400 font-medium">Portfolio</a>
+                <a href="index.html#pricing" class="block py-2 text-gray-300 hover:text-white">Pricing</a>
+                <div class="pt-3 border-t border-gray-700/50">
+                    <a id="mobile-signin" href="/login" class="hidden w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition inline-flex items-center justify-center">Sign In</a>
+                    <button id="mobile-profile" class="hidden w-full mt-2 bg-dark-800 border border-gray-700 text-white py-2 rounded-lg font-semibold transition inline-flex items-center justify-center space-x-2" type="button">
+                        <span class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold text-xs">
+                            <span id="mobile-initials">?</span>
+                        </span>
+                        <span id="mobile-username" class="truncate">-</span>
+                    </button>
+                    <button id="mobile-logout" class="hidden w-full mt-2 bg-red-500/10 border border-red-500/30 text-red-200 py-2 rounded-lg font-semibold transition" type="button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">Markets Overview</h1>
+            <p class="text-gray-400">Track real-time prices and trends across all markets</p>
+        </div>
+
+        <!-- Market Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass rounded-xl p-4 border border-gray-700/50">
+                <p class="text-xs text-gray-500 mb-1">24h Volume</p>
+                <p id="stat-total-volume" class="text-xl font-bold">-</p>
+                <p id="stat-total-volume-change" class="text-gray-400 text-xs mt-1">-</p>
+            </div>
+            <div class="glass rounded-xl p-4 border border-gray-700/50">
+                <p class="text-xs text-gray-500 mb-1">Active Markets</p>
+                <p id="stat-active-markets" class="text-xl font-bold">-</p>
+                <p class="text-gray-400 text-xs mt-1">Across all categories</p>
+            </div>
+            <div class="glass rounded-xl p-4 border border-gray-700/50">
+                <p class="text-xs text-gray-500 mb-1">Top Gainer (24h)</p>
+                <p id="stat-top-gainer" class="text-xl font-bold text-trade-green">-</p>
+                <p id="stat-top-gainer-name" class="text-gray-400 text-xs mt-1">-</p>
+            </div>
+            <div class="glass rounded-xl p-4 border border-gray-700/50">
+                <p class="text-xs text-gray-500 mb-1">Most Traded</p>
+                <p id="stat-most-traded" class="text-xl font-bold">-</p>
+                <p id="stat-most-traded-volume" class="text-gray-400 text-xs mt-1">-</p>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div class="relative w-full md:w-96">
+                <i data-lucide="search" class="w-5 h-5 text-gray-500 absolute left-3 top-3"></i>
+                <input type="text" placeholder="Search assets, symbols, or categories..." 
+                    class="w-full bg-dark-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                    oninput="filterMarkets(this.value)">
+            </div>
+            
+            <div class="flex space-x-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                <button onclick="filterCategory('all')" id="cat-all" class="px-4 py-2 rounded-lg border border-blue-500/50 bg-blue-500/10 text-blue-400 text-sm font-medium transition whitespace-nowrap">
+                    All Markets
+                </button>
+                <button onclick="filterCategory('crypto')" id="cat-crypto" class="px-4 py-2 rounded-lg border border-gray-700 bg-dark-800 text-gray-400 text-sm font-medium transition hover:border-gray-600 whitespace-nowrap">
+                    Crypto
+                </button>
+                <button onclick="filterCategory('stocks')" id="cat-stocks" class="px-4 py-2 rounded-lg border border-gray-700 bg-dark-800 text-gray-400 text-sm font-medium transition hover:border-gray-600 whitespace-nowrap">
+                    Stocks
+                </button>
+                <button onclick="filterCategory('forex')" id="cat-forex" class="px-4 py-2 rounded-lg border border-gray-700 bg-dark-800 text-gray-400 text-sm font-medium transition hover:border-gray-600 whitespace-nowrap">
+                    Forex
+                </button>
+                <button onclick="filterCategory('commodities')" id="cat-commodities" class="px-4 py-2 rounded-lg border border-gray-700 bg-dark-800 text-gray-400 text-sm font-medium transition hover:border-gray-600 whitespace-nowrap">
+                    Commodities
+                </button>
+            </div>
+        </div>
+
+        <!-- Market Table -->
+        <div class="glass rounded-xl border border-gray-700/50 overflow-hidden mb-8">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full">
+                    <thead class="bg-dark-800/50 border-b border-gray-700/50">
+                        <tr class="text-left text-xs text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-4 font-medium cursor-pointer hover:text-white transition" onclick="sortTable('asset')">
+                                <div class="flex items-center space-x-1">
+                                    <span>Asset</span>
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3"></i>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 font-medium cursor-pointer hover:text-white transition" onclick="sortTable('price')">
+                                <div class="flex items-center space-x-1">
+                                    <span>Price</span>
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3"></i>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 font-medium cursor-pointer hover:text-white transition" onclick="sortTable('change')">
+                                <div class="flex items-center space-x-1">
+                                    <span>24h Change</span>
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3"></i>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 font-medium cursor-pointer hover:text-white transition" onclick="sortTable('volume')">
+                                <div class="flex items-center space-x-1">
+                                    <span>24h Volume</span>
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3"></i>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 font-medium">Chart</th>
+                            <th class="px-6 py-4 font-medium text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="markets-table-body" class="divide-y divide-gray-800">
+                        <!-- BTC -->
+                        <tr class="market-row transition cursor-pointer" data-category="crypto" data-name="Bitcoin BTC">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="bitcoin" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">BTC</p>
+                                        <p class="text-xs text-gray-500">Bitcoin</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-btc">$67,245.00</p>
+                                <p class="text-xs text-gray-500">≈ $67,245.00</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-btc" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-green/10 text-trade-green">
+                                    <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                                    +2.45%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $892.5M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,25 Q20,20 40,15 T100,5" fill="none" stroke="#10b981" stroke-width="2" class="mini-chart sparkline-up"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=BTC" onclick="setTradeSymbol('BTC')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- ETH -->
+                        <tr class="market-row transition cursor-pointer" data-category="crypto" data-name="Ethereum ETH">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="hexagon" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">ETH</p>
+                                        <p class="text-xs text-gray-500">Ethereum</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-eth">$3,456.12</p>
+                                <p class="text-xs text-gray-500">≈ $3,456.12</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-eth" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-red/10 text-trade-red">
+                                    <i data-lucide="trending-down" class="w-3 h-3 mr-1"></i>
+                                    -1.23%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $445.2M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,10 Q30,15 60,20 T100,25" fill="none" stroke="#ef4444" stroke-width="2" class="mini-chart sparkline-down"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=ETH" onclick="setTradeSymbol('ETH')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- SOL -->
+                        <tr class="market-row transition cursor-pointer" data-category="crypto" data-name="Solana SOL">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">SOL</p>
+                                        <p class="text-xs text-gray-500">Solana</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-sol">$142.85</p>
+                                <p class="text-xs text-gray-500">≈ $142.85</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-sol" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-green/10 text-trade-green">
+                                    <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                                    +12.4%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $234.1M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,25 Q20,20 40,10 T100,5" fill="none" stroke="#10b981" stroke-width="2" class="mini-chart sparkline-up"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=SOL" onclick="setTradeSymbol('SOL')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- AAPL -->
+                        <tr class="market-row transition cursor-pointer" data-category="stocks" data-name="Apple AAPL">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                        <i data-lucide="smartphone" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">AAPL</p>
+                                        <p class="text-xs text-gray-500">Apple Inc.</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-aapl">$178.35</p>
+                                <p class="text-xs text-gray-500">≈ $178.35</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-aapl" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-green/10 text-trade-green">
+                                    <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                                    +0.85%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $52.3M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,20 Q30,18 60,15 T100,12" fill="none" stroke="#10b981" stroke-width="2" class="mini-chart sparkline-up"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=AAPL" onclick="setTradeSymbol('AAPL')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- EUR/USD -->
+                        <tr class="market-row transition cursor-pointer" data-category="forex" data-name="EURUSD">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white">
+                                        €/$
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">EUR/USD</p>
+                                        <p class="text-xs text-gray-500">Euro / US Dollar</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-eurusd">1.0845</p>
+                                <p class="text-xs text-gray-500">≈ $1.0845</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-eurusd" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-red/10 text-trade-red">
+                                    <i data-lucide="trending-down" class="w-3 h-3 mr-1"></i>
+                                    -0.12%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $892.1M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,15 Q50,12 100,18" fill="none" stroke="#ef4444" stroke-width="2" class="mini-chart sparkline-down"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=EUR%2FUSD" onclick="setTradeSymbol('EUR/USD')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- GOLD -->
+                        <tr class="market-row transition cursor-pointer" data-category="commodities" data-name="Gold XAU">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="gem" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">XAU/USD</p>
+                                        <p class="text-xs text-gray-500">Gold</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-xauusd">$2,045.80</p>
+                                <p class="text-xs text-gray-500">≈ $2,045.80</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-xauusd" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-green/10 text-trade-green">
+                                    <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                                    +1.45%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $123.4M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,20 Q25,15 50,18 T100,10" fill="none" stroke="#10b981" stroke-width="2" class="mini-chart sparkline-up"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=XAU%2FUSD" onclick="setTradeSymbol('XAU/USD')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- TSLA -->
+                        <tr class="market-row transition cursor-pointer" data-category="stocks" data-name="Tesla TSLA">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                                        <i data-lucide="car" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">TSLA</p>
+                                        <p class="text-xs text-gray-500">Tesla Inc.</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-tsla">$242.15</p>
+                                <p class="text-xs text-gray-500">≈ $242.15</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-tsla" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-red/10 text-trade-red">
+                                    <i data-lucide="trending-down" class="w-3 h-3 mr-1"></i>
+                                    -3.24%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $445.2M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,10 Q30,15 60,20 T100,25" fill="none" stroke="#ef4444" stroke-width="2" class="mini-chart sparkline-down"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=TSLA" onclick="setTradeSymbol('TSLA')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- ADA -->
+                        <tr class="market-row transition cursor-pointer" data-category="crypto" data-name="Cardano ADA">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
+                                        <i data-lucide="circle" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">ADA</p>
+                                        <p class="text-xs text-gray-500">Cardano</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium" id="price-ada">$0.4850</p>
+                                <p class="text-xs text-gray-500">≈ $0.4850</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span id="change-ada" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-trade-green/10 text-trade-green">
+                                    <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                                    +5.67%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                $89.2M
+                            </td>
+                            <td class="px-6 py-4">
+                                <svg class="w-24 h-10" viewBox="0 0 100 30">
+                                    <path d="M0,22 Q25,18 50,15 T100,8" fill="none" stroke="#10b981" stroke-width="2" class="mini-chart sparkline-up"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="trade.html?symbol=ADA" onclick="setTradeSymbol('ADA')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                    Trade
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trending & New Sections -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Trending Now -->
+            <div class="glass rounded-xl border border-gray-700/50 p-6">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i data-lucide="flame" class="w-5 h-5 text-orange-500 mr-2"></i>
+                    Trending Now
+                </h3>
+                <div id="trending-now" class="space-y-4"></div>
+            </div>
+
+            <!-- New Listings -->
+            <div class="glass rounded-xl border border-gray-700/50 p-6">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-blue-500 mr-2"></i>
+                    New Listings
+                </h3>
+                <div id="new-listings" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark-800/50 border-t border-gray-800 mt-12 pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Product</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Exchange</a></li>
+                        <li><a href="portfolio.html" class="hover:text-white transition">Portfolio</a></li>
+                        <li><a href="#" class="hover:text-white transition">Trading Fees</a></li>
+                        <li><a href="#" class="hover:text-white transition">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Support</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition">Trading Guide</a></li>
+                        <li><a href="#" class="hover:text-white transition">Market News</a></li>
+                        <li><a href="#" class="hover:text-white transition">Status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cookie Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Risk Disclosure</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm">Community</h4>
+                    <div class="flex space-x-3">
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-600 transition">
+                            <i data-lucide="twitter" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-600 transition">
+                            <i data-lucide="linkedin" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-600 transition">
+                            <i data-lucide="github" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-600 transition">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 text-sm">© 2024 TradeFlow Pro. All rights reserved.</p>
+                <p class="text-gray-600 text-xs mt-2 md:mt-0">Trade responsibly. All trading involves risk.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function base64UrlDecode(input) {
+            let str = input.replace(/-/g, '+').replace(/_/g, '/');
+            while (str.length % 4) str += '=';
+            const decoded = atob(str);
+            return decodeURIComponent(decoded.split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        }
+
+        function getUsernameFromToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+            const parts = token.split('.');
+            if (parts.length !== 3) return null;
+            try {
+                const payload = JSON.parse(base64UrlDecode(parts[1]));
+                if (!payload || typeof payload.sub !== 'string') return null;
+                if (typeof payload.exp === 'number' && Math.floor(Date.now() / 1000) >= payload.exp) {
+                    localStorage.removeItem('token');
+                    return null;
+                }
+                return payload.sub;
+            } catch {
+                return null;
+            }
+        }
+
+        function initialsFor(username) {
+            const name = (username || '').trim();
+            if (!name) return '?';
+            const parts = name.split(/[^A-Za-z0-9]+/).filter(Boolean);
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return parts[0].slice(0, 2).toUpperCase();
+        }
+
+        function getBackendBase() {
+            if (window.location.protocol === 'file:') return 'http://localhost:8080';
+            return `${window.location.protocol}//${window.location.hostname}:8080`;
+        }
+
+        function formatUsd(value) {
+            const num = typeof value === 'number' ? value : Number(value);
+            if (!Number.isFinite(num)) return '$0.00';
+            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function loadAccountBalance() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const backendBase = getBackendBase();
+                const res = await fetch(`${backendBase}/account`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    setupProfileNav();
+                    return;
+                }
+
+                const data = await res.json().catch(() => null);
+                if (!res.ok || !data || typeof data.cash !== 'number') return;
+
+                const navBalance = document.getElementById('nav-balance');
+                if (navBalance) navBalance.textContent = formatUsd(data.cash);
+            } catch {
+                return;
+            }
+        }
+
+        function setupProfileNav() {
+            const username = getUsernameFromToken();
+            const profileButton = document.getElementById('profile-button');
+            const profileMenu = document.getElementById('profile-menu');
+            const signin = document.getElementById('nav-signin');
+            const navWallet = document.getElementById('nav-wallet');
+
+            const mobileSignin = document.getElementById('mobile-signin');
+            const mobileProfile = document.getElementById('mobile-profile');
+            const mobileLogout = document.getElementById('mobile-logout');
+
+            if (!username) {
+                if (navWallet) navWallet.classList.add('hidden');
+                profileButton.classList.add('hidden');
+                signin.classList.remove('hidden');
+                mobileSignin.classList.remove('hidden');
+                mobileProfile.classList.add('hidden');
+                mobileLogout.classList.add('hidden');
+                const navBalance = document.getElementById('nav-balance');
+                if (navBalance) navBalance.textContent = formatUsd(0);
+                return;
+            }
+
+            signin.classList.add('hidden');
+            if (navWallet) navWallet.classList.remove('hidden');
+            profileButton.classList.remove('hidden');
+            document.getElementById('profile-initials').textContent = initialsFor(username);
+            document.getElementById('profile-username').textContent = username;
+
+            mobileSignin.classList.add('hidden');
+            mobileProfile.classList.remove('hidden');
+            mobileLogout.classList.remove('hidden');
+            document.getElementById('mobile-initials').textContent = initialsFor(username);
+            document.getElementById('mobile-username').textContent = username;
+
+            profileButton.addEventListener('click', () => {
+                profileMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                    profileMenu.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+            mobileLogout.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+        }
+
+        setupProfileNav();
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+        loadAccountBalance();
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        let currentMarketCategory = 'all';
+        let currentMarketSearch = '';
+
+        function applyMarketFilters() {
+            const rows = document.querySelectorAll('.market-row');
+            rows.forEach(row => {
+                const matchesCategory = currentMarketCategory === 'all' || row.dataset.category === currentMarketCategory;
+                const matchesSearch = !currentMarketSearch || (row.dataset.name || '').toLowerCase().includes(currentMarketSearch);
+                row.style.display = (matchesCategory && matchesSearch) ? '' : 'none';
+            });
+        }
+
+        // Filter by category
+        function filterCategory(category) {
+            currentMarketCategory = category;
+            // Update active button
+            document.querySelectorAll('[id^="cat-"]').forEach(btn => {
+                btn.classList.remove('border-blue-500/50', 'bg-blue-500/10', 'text-blue-400');
+                btn.classList.add('border-gray-700', 'bg-dark-800', 'text-gray-400');
+            });
+            
+            const activeBtn = document.getElementById(`cat-${category}`);
+            activeBtn.classList.remove('border-gray-700', 'bg-dark-800', 'text-gray-400');
+            activeBtn.classList.add('border-blue-500/50', 'bg-blue-500/10', 'text-blue-400');
+
+            // Filter table rows
+            applyMarketFilters();
+        }
+
+        // Filter by search
+        function filterMarkets(searchTerm) {
+            currentMarketSearch = (searchTerm || '').toLowerCase();
+            applyMarketFilters();
+        }
+
+        // Toggle favorite
+        function toggleFavorite(btn) {
+            btn.classList.toggle('active');
+            const icon = btn.querySelector('svg');
+            if (btn.classList.contains('active')) {
+                icon.setAttribute('fill', 'currentColor');
+            } else {
+                icon.setAttribute('fill', 'none');
+            }
+        }
+
+        // Sort table (placeholder functionality)
+        function sortTable(column) {
+            console.log('Sorting by:', column);
+            // In a real app, this would sort the table data
+        }
+
+        function setTradeSymbol(symbol) {
+            try {
+                localStorage.setItem('tradeSymbol', symbol);
+                localStorage.setItem('tradeSide', 'buy');
+            } catch {
+                return;
+            }
+        }
+
+        function formatMarketPrice(symbol, price) {
+            const num = Number(price);
+            if (!Number.isFinite(num)) return '-';
+            if (symbol.includes('/')) return num.toFixed(4);
+            if (num < 1) return '$' + num.toFixed(4);
+            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function marketLogoHtml(asset) {
+            const icon = asset && asset.icon ? asset.icon : 'circle';
+            return `<div class="w-10 h-10 bg-dark-700 rounded-full flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5 text-white"></i></div>`;
+        }
+
+        const marketHistoryBySymbol = new Map();
+        const marketHistoryWindowMs = 60_000;
+        let lastTotalVolumeUsd = null;
+
+        function sparklineLineD(values, width, height) {
+            const vals = (values || []).map(Number).filter(Number.isFinite);
+            if (vals.length < 2) return `M0,${height / 2} L${width},${height / 2}`;
+            let min = Math.min(...vals);
+            let max = Math.max(...vals);
+            if (max - min < 1e-9) max = min + 1;
+            const toX = (i) => (i / (vals.length - 1)) * width;
+            const toY = (v) => {
+                const t = (v - min) / (max - min);
+                return height - t * height;
+            };
+            let d = `M${toX(0)},${toY(vals[0])}`;
+            for (let i = 1; i < vals.length; i++) d += ` L${toX(i)},${toY(vals[i])}`;
+            return d;
+        }
+
+        function formatCompactUsd(value) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '-';
+            const abs = Math.abs(num);
+            if (abs >= 1e12) return '$' + (num / 1e12).toFixed(2) + 'T';
+            if (abs >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
+            if (abs >= 1e6) return '$' + (num / 1e6).toFixed(2) + 'M';
+            if (abs >= 1e3) return '$' + (num / 1e3).toFixed(2) + 'K';
+            return '$' + num.toFixed(2);
+        }
+
+        function formatSignedPercent(value) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '+0.00%';
+            return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`;
+        }
+
+        function updateMarketStats(assets) {
+            const list = Array.isArray(assets) ? assets : [];
+
+            const active = document.getElementById('stat-active-markets');
+            if (active) active.textContent = list.length.toLocaleString('en-US');
+
+            const totalVol = list.reduce((sum, a) => sum + (Number(a.volume_24h_usd) || 0), 0);
+            const totalVolEl = document.getElementById('stat-total-volume');
+            if (totalVolEl) totalVolEl.textContent = formatCompactUsd(totalVol);
+
+            const totalVolChangeEl = document.getElementById('stat-total-volume-change');
+            if (totalVolChangeEl) {
+                if (typeof lastTotalVolumeUsd === 'number' && lastTotalVolumeUsd > 0) {
+                    const pct = ((totalVol - lastTotalVolumeUsd) / lastTotalVolumeUsd) * 100;
+                    totalVolChangeEl.textContent = formatSignedPercent(pct);
+                    totalVolChangeEl.className = (pct >= 0 ? 'text-trade-green' : 'text-trade-red') + ' text-xs mt-1';
+                } else {
+                    totalVolChangeEl.textContent = '-';
+                    totalVolChangeEl.className = 'text-gray-400 text-xs mt-1';
+                }
+            }
+            lastTotalVolumeUsd = totalVol;
+
+            const sortedByChange = list
+                .filter(a => a && typeof a.symbol === 'string')
+                .map(a => ({ ...a, changeNum: Number(a.change) || 0 }))
+                .sort((l, r) => r.changeNum - l.changeNum);
+            const top = sortedByChange[0];
+            const topEl = document.getElementById('stat-top-gainer');
+            const topNameEl = document.getElementById('stat-top-gainer-name');
+            if (top && topEl && topNameEl) {
+                topEl.textContent = `${top.symbol} ${formatSignedPercent(top.changeNum)}`;
+                topEl.className = 'text-xl font-bold ' + (top.changeNum >= 0 ? 'text-trade-green' : 'text-trade-red');
+                topNameEl.textContent = top.name || top.symbol;
+            }
+
+            const most = list
+                .filter(a => a && typeof a.symbol === 'string')
+                .map(a => ({ ...a, vol: Number(a.volume_24h_usd) || 0 }))
+                .sort((l, r) => r.vol - l.vol)[0];
+            const mostEl = document.getElementById('stat-most-traded');
+            const mostVolEl = document.getElementById('stat-most-traded-volume');
+            if (most && mostEl && mostVolEl) {
+                mostEl.textContent = most.symbol;
+                mostVolEl.textContent = `${formatCompactUsd(most.vol)} volume`;
+            }
+        }
+
+        function renderTrendingNow(assets) {
+            const container = document.getElementById('trending-now');
+            if (!container) return;
+
+            const ranked = assets
+                .filter(a => a && typeof a.symbol === 'string')
+                .map(a => ({ ...a, changeNum: Number(a.change) || 0 }))
+                .sort((l, r) => Math.abs(r.changeNum) - Math.abs(l.changeNum))
+                .slice(0, 3);
+
+            container.innerHTML = ranked.map(a => {
+                const symbol = a.symbol;
+                const name = a.name || symbol;
+                const price = formatMarketPrice(symbol, a.price);
+                const pct = Number(a.change) || 0;
+                const up = pct >= 0;
+                const encoded = encodeURIComponent(symbol);
+                const icon = a.icon ? a.icon : 'circle';
+
+                return `
+                    <a href="trade.html?symbol=${encoded}" onclick="setTradeSymbol('${symbol}')" class="block">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-dark-800/30 border border-gray-700/30 hover:border-gray-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-dark-700 rounded-full flex items-center justify-center">
+                                    <i data-lucide="${icon}" class="w-4 h-4 text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">${symbol}</p>
+                                    <p class="text-xs text-gray-500">${name}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium text-sm">${price}</p>
+                                <p class="text-xs ${up ? 'text-trade-green' : 'text-trade-red'}">${up ? '+' : ''}${pct.toFixed(2)}%</p>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function renderNewListings(assets) {
+            const container = document.getElementById('new-listings');
+            if (!container) return;
+
+            const newOnes = assets
+                .filter(a => a && a.is_new === true)
+                .slice(0, 3);
+
+            const fallback = assets
+                .filter(a => a && typeof a.symbol === 'string')
+                .sort((l, r) => String(r.symbol).localeCompare(String(l.symbol)))
+                .slice(0, 3);
+
+            const list = (newOnes.length ? newOnes : fallback).slice(0, 3);
+
+            container.innerHTML = list.map(a => {
+                const symbol = a.symbol;
+                const name = a.name || symbol;
+                const encoded = encodeURIComponent(symbol);
+                const icon = a.icon ? a.icon : 'circle';
+
+                return `
+                    <a href="trade.html?symbol=${encoded}" onclick="setTradeSymbol('${symbol}')" class="block">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-dark-800/30 border border-gray-700/30 hover:border-gray-600 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-dark-700 rounded-full flex items-center justify-center">
+                                    <i data-lucide="${icon}" class="w-4 h-4 text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">${symbol}</p>
+                                    <p class="text-xs text-gray-500">${name}</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400">New</span>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function renderMarketsTable(assets) {
+            const tbody = document.getElementById('markets-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = assets.map(a => {
+                const symbol = a.symbol;
+                const name = a.name || symbol;
+                const category = a.category || 'all';
+                const price = formatMarketPrice(symbol, a.price);
+                const pct = Number(a.change) || 0;
+                const up = pct >= 0;
+                const encoded = encodeURIComponent(symbol);
+                const hist = marketHistoryBySymbol.get(symbol.toUpperCase()) || [];
+                const values = hist.map(p => p.price);
+                const pathD = sparklineLineD(values, 100, 40);
+
+                return `
+                    <tr class="market-row transition cursor-pointer" data-category="${category}" data-name="${name} ${symbol}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <button class="favorite-btn text-gray-600 hover:text-yellow-500 transition" onclick="toggleFavorite(this)">
+                                    <i data-lucide="star" class="w-4 h-4"></i>
+                                </button>
+                                ${marketLogoHtml(a)}
+                                <div>
+                                    <p class="font-bold text-sm">${symbol}</p>
+                                    <p class="text-xs text-gray-500">${name}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="font-medium">${price}</p>
+                            <p class="text-xs text-gray-500">≈ ${price}</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${up ? 'bg-trade-green/10 text-trade-green' : 'bg-trade-red/10 text-trade-red'}">
+                                <i data-lucide="${up ? 'trending-up' : 'trending-down'}" class="w-3 h-3 mr-1"></i>
+                                ${up ? '+' : ''}${pct.toFixed(2)}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-400">-</td>
+                        <td class="px-6 py-4">
+                            <svg class="w-16 h-8" viewBox="0 0 100 40">
+                                <path d="${pathD}"
+                                    fill="none"
+                                    stroke="${up ? '#10b981' : '#ef4444'}"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="mini-chart ${up ? 'sparkline-up' : 'sparkline-down'}"/>
+                            </svg>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="trade.html?symbol=${encoded}" onclick="setTradeSymbol('${symbol}')" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+                                Trade
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        async function refreshMarkets() {
+            try {
+                const backendBase = getBackendBase();
+                const res = await fetch(`${backendBase}/markets`, { method: 'GET' });
+                const data = await res.json().catch(() => null);
+                const assets = data && Array.isArray(data.assets) ? data.assets : [];
+                if (assets.length > 0) {
+                    const now = Date.now();
+                    for (const a of assets) {
+                        if (!a || typeof a.symbol !== 'string') continue;
+                        const symbol = a.symbol.toUpperCase();
+                        const price = Number(a.price);
+                        if (!Number.isFinite(price)) continue;
+                        const prev = marketHistoryBySymbol.get(symbol) || [];
+                        const next = prev.length ? prev.slice() : [];
+                        next.push({ t: now, price });
+                        const pruned = next.filter(p => (now - p.t) <= marketHistoryWindowMs);
+                        marketHistoryBySymbol.set(symbol, pruned);
+                    }
+                    renderMarketsTable(assets);
+                    renderTrendingNow(assets);
+                    renderNewListings(assets);
+                    updateMarketStats(assets);
+                    applyMarketFilters();
+                }
+            } catch {
+                return;
+            }
+        }
+
+        refreshMarkets();
+        setInterval(refreshMarkets, 2000);
+    </script>
+</body>
+</html>

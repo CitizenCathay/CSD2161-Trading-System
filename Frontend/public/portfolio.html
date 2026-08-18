@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio - TradeFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            600: '#475569',
+                            500: '#64748b',
+                        },
+                        trade: {
+                            green: '#10b981',
+                            red: '#ef4444',
+                            accent: '#3b82f6',
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .positive {
+            color: #10b981;
+        }
+        
+        .negative {
+            color: #ef4444;
+        }
+        
+        .chart-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s ease-out forwards;
+        }
+        
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .live-indicator {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        .glow-bg {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .glow-1 { top: -200px; left: -200px; }
+        .glow-2 { bottom: -200px; right: -200px; background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%); }
+        
+        .asset-row {
+            transition: all 0.3s ease;
+        }
+        
+        .asset-row:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .mini-chart {
+            width: 100%;
+            height: 40px;
+        }
+        
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .search-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-input::placeholder {
+            color: #64748b;
+        }
+        
+        .sort-btn:hover {
+            color: #3b82f6;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.8);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.9);
+        }
+    </style>
+</head>
+<body class="text-white antialiased overflow-x-hidden relative">
+
+    <!-- Background Glow Effects -->
+    <div class="glow-bg glow-1"></div>
+    <div class="glow-bg glow-2"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">TradeFlow</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-300 hover:text-white transition">Home</a>
+                    <a href="markets.html" class="text-gray-300 hover:text-white transition">Markets</a>
+                    <a href="portfolio.html" class="text-blue-400 font-medium">Portfolio</a>
+                    <a href="index.html#pricing" class="text-gray-300 hover:text-white transition">Pricing</a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <div id="nav-wallet" class="flex items-center space-x-2 px-3 py-1 rounded-full bg-dark-800 border border-gray-700">
+                        <i data-lucide="wallet" class="w-4 h-4 text-gray-400"></i>
+                        <span id="nav-balance" class="text-sm font-medium">$0.00</span>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-dark-800 border border-gray-700 flex items-center justify-center hover:bg-dark-700 transition">
+                        <i data-lucide="bell" class="w-4 h-4 text-gray-400"></i>
+                    </button>
+                    <div class="relative">
+                        <a id="nav-signin" href="/login" class="hidden px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">Sign In</a>
+                        <button id="profile-button" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold text-sm" type="button">
+                            <span id="profile-initials">?</span>
+                        </button>
+                        <div id="profile-menu" class="hidden absolute right-0 mt-3 w-56 glass rounded-xl border border-gray-700/50 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-gray-700/50">
+                                <p class="text-xs text-gray-500">Signed in as</p>
+                                <p id="profile-username" class="text-sm font-semibold text-white truncate">-</p>
+                            </div>
+                            <div class="py-2">
+                                <a href="portfolio.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-800/60 hover:text-white transition">Portfolio</a>
+                                <button id="logout-button" class="w-full text-left px-4 py-2 text-sm text-red-200 hover:bg-red-500/10 transition" type="button">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-gray-700">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="index.html" class="block py-2 text-gray-300 hover:text-white">Home</a>
+                <a href="trade.html" class="block py-2 text-gray-300 hover:text-white">Trade</a>
+                <a href="portfolio.html" class="block py-2 text-blue-400 font-medium">Portfolio</a>
+                <a href="index.html#pricing" class="block py-2 text-gray-300 hover:text-white">Pricing</a>
+                <div class="pt-3 border-t border-gray-700/50">
+                    <a id="mobile-signin" href="/login" class="hidden w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition inline-flex items-center justify-center">Sign In</a>
+                    <button id="mobile-profile" class="hidden w-full mt-2 bg-dark-800 border border-gray-700 text-white py-2 rounded-lg font-semibold transition inline-flex items-center justify-center space-x-2" type="button">
+                        <span class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold text-xs">
+                            <span id="mobile-initials">?</span>
+                        </span>
+                        <span id="mobile-username" class="truncate">-</span>
+                    </button>
+                    <button id="mobile-logout" class="hidden w-full mt-2 bg-red-500/10 border border-red-500/30 text-red-200 py-2 rounded-lg font-semibold transition" type="button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
+        
+        <!-- Header Section -->
+        <div class="mb-8 animate-slide-up">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">My Portfolio</h1>
+                    <p class="text-gray-400">Track and manage your purchased assets</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="refreshData()" class="glass-card px-4 py-2.5 rounded-xl flex items-center space-x-2 hover:border-trade-accent/50 transition-all group">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-400 group-hover:text-trade-accent group-hover:rotate-180 transition-all duration-500"></i>
+                        <span class="text-sm font-medium text-gray-300">Refresh</span>
+                    </button>
+                    <button class="bg-gradient-to-r from-trade-accent to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center space-x-2 transition-all hover:shadow-lg hover:shadow-trade-accent/25 hover:-translate-y-0.5">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Add Asset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up" style="animation-delay: 0.1s;">
+            <!-- Total Value -->
+            <div class="glass rounded-2xl p-6 border border-white/5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-trade-accent/20 flex items-center justify-center">
+                        <i data-lucide="wallet" class="w-6 h-6 text-trade-accent"></i>
+                    </div>
+                    <span class="flex items-center space-x-1 text-trade-green text-sm font-medium bg-trade-green/10 px-2 py-1 rounded-full">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i>
+                        <span id="summary-total-change-pct">+0.00%</span>
+                    </span>
+                </div>
+                <p class="text-gray-400 text-sm mb-1">Total Portfolio Value</p>
+                <p class="text-2xl sm:text-3xl font-bold text-white" id="total-value">$124,893.45</p>
+                <p class="text-xs text-gray-500 mt-2">Updated just now</p>
+            </div>
+
+            <!-- Day Change -->
+            <div class="glass rounded-2xl p-6 border border-white/5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-trade-green/20 flex items-center justify-center">
+                        <i data-lucide="activity" class="w-6 h-6 text-trade-green"></i>
+                    </div>
+                    <span class="flex items-center space-x-1 text-trade-green text-sm font-medium bg-trade-green/10 px-2 py-1 rounded-full">
+                        <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                        <span id="summary-24h-change-pct">+0.00%</span>
+                    </span>
+                </div>
+                <p class="text-gray-400 text-sm mb-1">24h Change</p>
+                <p class="text-2xl sm:text-3xl font-bold text-white" id="summary-24h-change-value">+$0.00</p>
+                <p class="text-xs text-gray-500 mt-2">Since yesterday</p>
+            </div>
+
+            <!-- Total Assets -->
+            <div class="glass rounded-2xl p-6 border border-white/5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-trade-purple/20 flex items-center justify-center">
+                        <i data-lucide="layers" class="w-6 h-6 text-trade-purple"></i>
+                    </div>
+                </div>
+                <p class="text-gray-400 text-sm mb-1">Total Assets</p>
+                <p class="text-2xl sm:text-3xl font-bold text-white" id="total-assets">12</p>
+                <p class="text-xs text-gray-500 mt-2" id="summary-markets-count">Across 0 markets</p>
+            </div>
+
+            <!-- Best Performer -->
+            <div class="glass rounded-2xl p-6 border border-white/5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                        <i data-lucide="trophy" class="w-6 h-6 text-yellow-500"></i>
+                    </div>
+                    <span id="summary-best-performer-pct" class="text-trade-green text-sm font-medium">+0.00%</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-1">Best Performer</p>
+                <p class="text-2xl sm:text-3xl font-bold text-white" id="summary-best-performer-symbol">-</p>
+                <p class="text-xs text-gray-500 mt-2" id="summary-best-performer-name">-</p>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="glass rounded-2xl p-4 mb-6 animate-slide-up" style="animation-delay: 0.2s;">
+            <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium border border-white/10 bg-white/5 text-gray-300" onclick="filterAssets('all', this)">
+                        All Assets
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border border-white/10 bg-white/5 text-gray-300 hover:bg-white/10" onclick="filterAssets('crypto', this)">
+                        Crypto
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border border-white/10 bg-white/5 text-gray-300 hover:bg-white/10" onclick="filterAssets('stocks', this)">
+                        Stocks
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border border-white/10 bg-white/5 text-gray-300 hover:bg-white/10" onclick="filterAssets('forex', this)">
+                        Forex
+                    </button>
+                </div>
+
+                <!-- Search and Sort -->
+                <div class="flex gap-3 w-full lg:w-auto">
+                    <div class="relative flex-1 lg:w-64">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+                        <input type="text" id="search-input" placeholder="Search assets..." class="search-input w-full pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none" oninput="searchAssets(this.value)">
+                    </div>
+                    <button class="glass-card px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors" onclick="toggleSort()">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4 text-gray-400"></i>
+                    </button>
+                    <button class="glass-card px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors hidden sm:block" onclick="toggleView()">
+                        <i data-lucide="layout-grid" class="w-4 h-4 text-gray-400" id="view-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assets Table -->
+        <div class="glass rounded-2xl overflow-hidden border border-white/5 animate-slide-up" style="animation-delay: 0.3s;" id="assets-container">
+            <!-- Table Header -->
+            <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-white/5 border-b border-white/5 text-sm font-medium text-gray-400">
+                <div class="col-span-3 cursor-pointer sort-btn flex items-center space-x-1" onclick="sortAssets('name')">
+                    <span>Asset</span>
+                    <i data-lucide="chevrons-up-down" class="w-3 h-3"></i>
+                </div>
+                <div class="col-span-2 text-right cursor-pointer sort-btn" onclick="sortAssets('price')">Price</div>
+                <div class="col-span-2 text-right cursor-pointer sort-btn" onclick="sortAssets('change')">24h Change</div>
+                <div class="col-span-2 text-right cursor-pointer sort-btn" onclick="sortAssets('holdings')">Holdings</div>
+                <div class="col-span-2 text-right cursor-pointer sort-btn" onclick="sortAssets('value')">Value</div>
+                <div class="col-span-1 text-center">Chart</div>
+            </div>
+
+            <!-- Assets List -->
+            <div id="assets-list" class="divide-y divide-white/5">
+                <!-- Assets will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden glass rounded-2xl p-12 text-center border border-white/5">
+            <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="search-x" class="w-10 h-10 text-gray-500"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">No assets found</h3>
+            <p class="text-gray-400">Try adjusting your search or filter criteria</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex justify-between items-center animate-slide-up" style="animation-delay: 0.4s;">
+            <p class="text-sm text-gray-400" id="showing-text">Showing 12 assets</p>
+            <div class="flex space-x-2">
+                <button class="glass-card px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50" disabled>
+                    Previous
+                </button>
+                <button class="glass-card px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50" disabled>
+                    Next
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Asset Detail Modal -->
+    <div id="asset-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="glass rounded-2xl w-full max-w-lg relative z-10 border border-white/10 transform scale-95 opacity-0 transition-all duration-300" id="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div id="modal-icon" class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold"></div>
+                        <div>
+                            <h3 id="modal-name" class="text-2xl font-bold text-white"></h3>
+                            <p id="modal-symbol" class="text-gray-400"></p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+                    </button>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex items-baseline space-x-2 mb-1">
+                        <span id="modal-price" class="text-4xl font-bold text-white"></span>
+                        <span id="modal-change" class="text-lg font-medium"></span>
+                    </div>
+                    <div class="h-32 w-full bg-white/5 rounded-xl flex items-center justify-center">
+                        <svg class="w-full h-full px-4" viewBox="0 0 300 100" preserveAspectRatio="none">
+                            <path id="modal-chart-path" fill="none" stroke="#3b82f6" stroke-width="2" vector-effect="non-scaling-stroke"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white/5 rounded-xl p-4">
+                        <p class="text-xs text-gray-400 mb-1">Your Holdings</p>
+                        <p id="modal-holdings" class="text-lg font-semibold text-white"></p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4">
+                        <p class="text-xs text-gray-400 mb-1">Total Value</p>
+                        <p id="modal-value" class="text-lg font-semibold text-white"></p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4">
+                        <p class="text-xs text-gray-400 mb-1">Avg. Buy Price</p>
+                        <p id="modal-avg-price" class="text-lg font-semibold text-white"></p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4">
+                        <p class="text-xs text-gray-400 mb-1">Profit/Loss</p>
+                        <p id="modal-pnl" class="text-lg font-semibold"></p>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button id="modal-buy-more" class="flex-1 bg-trade-accent hover:bg-blue-500 text-white py-3 rounded-xl font-semibold transition-colors" type="button">
+                        Buy More
+                    </button>
+                    <button id="modal-sell" class="flex-1 bg-trade-red hover:bg-red-500 text-white py-3 rounded-xl font-semibold transition-colors" type="button">
+                        Sell
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        function getBackendBase() {
+            if (window.location.protocol === 'file:') return 'http://localhost:8080';
+            return `${window.location.protocol}//${window.location.hostname}:8080`;
+        }
+
+        function base64UrlDecode(input) {
+            let str = input.replace(/-/g, '+').replace(/_/g, '/');
+            while (str.length % 4) str += '=';
+            const decoded = atob(str);
+            return decodeURIComponent(decoded.split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        }
+
+        function getUsernameFromToken() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+            const parts = token.split('.');
+            if (parts.length !== 3) return null;
+            try {
+                const payload = JSON.parse(base64UrlDecode(parts[1]));
+                if (!payload || typeof payload.sub !== 'string') return null;
+                if (typeof payload.exp === 'number' && Math.floor(Date.now() / 1000) >= payload.exp) {
+                    localStorage.removeItem('token');
+                    return null;
+                }
+                return payload.sub;
+            } catch {
+                return null;
+            }
+        }
+
+        function initialsFor(username) {
+            const name = (username || '').trim();
+            if (!name) return '?';
+            const parts = name.split(/[^A-Za-z0-9]+/).filter(Boolean);
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return parts[0].slice(0, 2).toUpperCase();
+        }
+
+        function formatUsd(value) {
+            const num = typeof value === 'number' ? value : Number(value);
+            if (!Number.isFinite(num)) return '$0.00';
+            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        let portfolioData = [];
+        let marketMetaBySymbol = new Map();
+        let priceHistoryBySymbol = new Map();
+        let lastCash = null;
+        let initialPortfolioSnapshot = null;
+
+        try {
+            const raw = localStorage.getItem('priceHistoryBySymbol');
+            if (raw) {
+                const obj = JSON.parse(raw);
+                if (obj && typeof obj === 'object') {
+                    priceHistoryBySymbol = new Map(Object.entries(obj).map(([k, v]) => [String(k).toUpperCase(), Array.isArray(v) ? v.map(Number).filter(Number.isFinite) : []]));
+                }
+            }
+        } catch {
+            priceHistoryBySymbol = new Map();
+        }
+
+        try {
+            const raw = localStorage.getItem('portfolio_snapshot');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') initialPortfolioSnapshot = parsed;
+            }
+        } catch {
+            initialPortfolioSnapshot = null;
+        }
+
+        function savePortfolioSnapshot() {
+            try {
+                const marketMetaObj = Object.fromEntries(Array.from(marketMetaBySymbol.entries()));
+                const snapshot = {
+                    ts: Date.now(),
+                    cash: (typeof lastCash === 'number' && Number.isFinite(lastCash)) ? lastCash : null,
+                    marketMeta: marketMetaObj,
+                    portfolioData: portfolioData
+                };
+                localStorage.setItem('portfolio_snapshot', JSON.stringify(snapshot));
+            } catch {
+                return;
+            }
+        }
+
+        let currentFilter = 'all';
+        let currentView = 'list';
+        let sortConfig = { key: 'value', direction: 'desc' };
+
+        function colorForSymbol(symbol) {
+            let hash = 0;
+            for (let i = 0; i < symbol.length; i++) hash = ((hash << 5) - hash) + symbol.charCodeAt(i);
+            const hue = Math.abs(hash) % 360;
+            return `hsl(${hue} 80% 60%)`;
+        }
+
+        function typeForSymbol(symbol) {
+            const s = (symbol || '').toUpperCase();
+            if (s.includes('/')) return 'forex';
+            const crypto = new Set(['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'BNB', 'XRP', 'DOGE', 'AVAX', 'MATIC', 'LINK']);
+            if (crypto.has(s)) return 'crypto';
+            return 'stocks';
+        }
+
+        function iconForSymbol(symbol) {
+            const meta = marketMetaBySymbol.get((symbol || '').toUpperCase());
+            if (meta && typeof meta.icon === 'string') return meta.icon;
+            const map = new Map([
+                ['BTC', 'bitcoin'],
+                ['ETH', 'hexagon'],
+                ['SOL', 'zap'],
+                ['ADA', 'circle'],
+                ['AAPL', 'smartphone'],
+                ['TSLA', 'car'],
+                ['EUR/USD', 'dollar-sign'],
+                ['XAU/USD', 'gem']
+            ]);
+            return map.get((symbol || '').toUpperCase()) || 'circle';
+        }
+
+        function formatMarketPrice(symbol, price) {
+            const num = Number(price);
+            if (!Number.isFinite(num)) return '-';
+            if ((symbol || '').includes('/')) return num.toFixed(4);
+            if (num < 1) return '$' + num.toFixed(4);
+            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatSignedPercent(value) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '0.00%';
+            return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`;
+        }
+
+        function formatHoldings(value) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '0';
+            if (Number.isInteger(num)) return num.toLocaleString('en-US');
+            return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 6 });
+        }
+
+        function computePortfolioTotals(cash) {
+            const holdingsValue = portfolioData.reduce((sum, a) => sum + (Number(a.value) || 0), 0);
+            const cashValue = typeof cash === 'number' && Number.isFinite(cash) ? cash : 0;
+            const totalValue = cashValue + holdingsValue;
+
+            const changeValue = portfolioData.reduce((sum, a) => {
+                const v = Number(a.value);
+                const c = Number(a.change);
+                if (!Number.isFinite(v) || !Number.isFinite(c)) return sum;
+                return sum + (v * c / 100);
+            }, 0);
+
+            const prev = totalValue - changeValue;
+            const changePct = prev > 0 ? (changeValue / prev) * 100 : 0;
+            return { cashValue, holdingsValue, totalValue, changeValue, changePct };
+        }
+
+        function updateSummaryCards(cash) {
+            const { totalValue, changeValue, changePct } = computePortfolioTotals(cash);
+
+            const totalChangeEl = document.getElementById('summary-total-change-pct');
+            if (totalChangeEl) totalChangeEl.textContent = formatSignedPercent(changePct);
+
+            const dayPctEl = document.getElementById('summary-24h-change-pct');
+            if (dayPctEl) dayPctEl.textContent = formatSignedPercent(changePct);
+
+            const dayValueEl = document.getElementById('summary-24h-change-value');
+            if (dayValueEl) {
+                const sign = changeValue >= 0 ? '+' : '';
+                dayValueEl.textContent = sign + formatUsd(changeValue).replace('-', '');
+                dayValueEl.className = 'text-2xl sm:text-3xl font-bold ' + (changeValue >= 0 ? 'text-white' : 'text-white');
+            }
+
+            const marketsCountEl = document.getElementById('summary-markets-count');
+            if (marketsCountEl) {
+                const markets = new Set(portfolioData.map(a => a.type).filter(Boolean));
+                marketsCountEl.textContent = `Across ${markets.size} markets`;
+            }
+
+            const best = portfolioData
+                .filter(a => a && typeof a.symbol === 'string' && Number.isFinite(Number(a.change)))
+                .slice()
+                .sort((l, r) => Number(r.change) - Number(l.change))[0];
+
+            const bestPctEl = document.getElementById('summary-best-performer-pct');
+            const bestSymEl = document.getElementById('summary-best-performer-symbol');
+            const bestNameEl = document.getElementById('summary-best-performer-name');
+            if (best) {
+                const pct = Number(best.change);
+                if (bestPctEl) {
+                    bestPctEl.textContent = formatSignedPercent(pct);
+                    bestPctEl.className = (pct >= 0 ? 'text-trade-green' : 'text-trade-red') + ' text-sm font-medium';
+                }
+                if (bestSymEl) bestSymEl.textContent = best.symbol;
+                if (bestNameEl) bestNameEl.textContent = best.name || best.symbol;
+            } else {
+                if (bestPctEl) {
+                    bestPctEl.textContent = '+0.00%';
+                    bestPctEl.className = 'text-trade-green text-sm font-medium';
+                }
+                if (bestSymEl) bestSymEl.textContent = '-';
+                if (bestNameEl) bestNameEl.textContent = '-';
+            }
+        }
+
+        function sparklineLineD(values, width, height) {
+            const vals = (values || []).map(Number).filter(Number.isFinite);
+            if (vals.length < 2) return `M0,${height / 2} L${width},${height / 2}`;
+            let min = Math.min(...vals);
+            let max = Math.max(...vals);
+            if (max - min < 1e-9) max = min + 1;
+            const toX = (i) => (i / (vals.length - 1)) * width;
+            const toY = (v) => {
+                const t = (v - min) / (max - min);
+                return height - t * height;
+            };
+            let d = `M${toX(0)},${toY(vals[0])}`;
+            for (let i = 1; i < vals.length; i++) d += ` L${toX(i)},${toY(vals[i])}`;
+            return d;
+        }
+
+        function sparklineAreaD(values, width, height) {
+            const line = sparklineLineD(values, width, height);
+            return `${line} L${width},${height} L0,${height} Z`;
+        }
+
+        async function loadMarketMeta() {
+            try {
+                const backendBase = getBackendBase();
+                const res = await fetch(`${backendBase}/markets`, { method: 'GET' });
+                const data = await res.json().catch(() => null);
+                const assets = data && Array.isArray(data.assets) ? data.assets : [];
+                marketMetaBySymbol = new Map();
+                for (const a of assets) {
+                    if (!a || typeof a.symbol !== 'string') continue;
+                    marketMetaBySymbol.set(a.symbol.toUpperCase(), a);
+                }
+
+                for (const a of assets) {
+                    if (!a || typeof a.symbol !== 'string') continue;
+                    const symbol = a.symbol.toUpperCase();
+                    const price = Number(a.price);
+                    if (!Number.isFinite(price)) continue;
+                    const prev = priceHistoryBySymbol.get(symbol) || [];
+                    const next = prev.length ? prev.slice() : [];
+                    next.push(price);
+                    while (next.length > 40) next.shift();
+                    priceHistoryBySymbol.set(symbol, next);
+                }
+
+                try {
+                    const obj = Object.fromEntries(Array.from(priceHistoryBySymbol.entries()));
+                    localStorage.setItem('priceHistoryBySymbol', JSON.stringify(obj));
+                } catch {
+                    return;
+                }
+            } catch {
+                marketMetaBySymbol = new Map();
+            }
+        }
+
+        async function loadPortfolioFromBackend() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                portfolioData = [];
+                updateTotalAssets();
+                return;
+            }
+
+            try {
+                const backendBase = getBackendBase();
+                const res = await fetch(`${backendBase}/positions`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    portfolioData = [];
+                    updateTotalAssets();
+                    return;
+                }
+
+                const data = await res.json().catch(() => null);
+                const positions = data && Array.isArray(data.positions) ? data.positions : [];
+                let assets = [];
+
+                if (positions.length > 0) {
+                    assets = positions
+                        .filter(p => p && typeof p.symbol === 'string' && Number(p.qty) > 0)
+                        .map((p, idx) => {
+                            const symbol = p.symbol.toUpperCase();
+                            const qty = Number(p.qty);
+                            const price = 0;
+                            const avgPrice = 0;
+                            const history = [0, 0, 0, 0, 0];
+                            return {
+                                id: idx + 1,
+                                symbol,
+                                name: symbol,
+                                type: typeForSymbol(symbol),
+                                price,
+                                change: 0,
+                                holdings: qty,
+                                value: qty * price,
+                                avgPrice,
+                                color: colorForSymbol(symbol),
+                                history
+                            };
+                        });
+                } else {
+                    const ordersRes = await fetch(`${backendBase}/my-orders`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (ordersRes.ok) {
+                        const od = await ordersRes.json().catch(() => null);
+                        const orders = od && Array.isArray(od.orders) ? od.orders : [];
+                        const map = new Map();
+                        for (const o of orders) {
+                            const symbol = (o && o.symbol || '').toUpperCase();
+                            if (!symbol) continue;
+                            const filled = Math.max(0, Number(o.qty_total) - Number(o.qty_remaining));
+                            const price = Number(o.price);
+                            const side = (o.side || '').toLowerCase();
+                            if (!Number.isFinite(filled) || !Number.isFinite(price)) continue;
+                            const entry = map.get(symbol) || { buyQty: 0, buyCost: 0, sellQty: 0 };
+                            if (side === 'buy') {
+                                entry.buyQty += filled;
+                                entry.buyCost += filled * price;
+                            } else if (side === 'sell') {
+                                entry.sellQty += filled;
+                            }
+                            map.set(symbol, entry);
+                        }
+                        let id = 1;
+                        for (const [symbol, e] of map.entries()) {
+                            const net = e.buyQty - e.sellQty;
+                            if (net <= 0) continue;
+                            const avgPrice = e.buyQty > 0 ? e.buyCost / e.buyQty : 0;
+                            const price = avgPrice;
+                            assets.push({
+                                id: id++,
+                                symbol,
+                                name: symbol,
+                                type: typeForSymbol(symbol),
+                                price,
+                                change: 0,
+                                holdings: net,
+                                value: net * price,
+                                avgPrice,
+                                color: colorForSymbol(symbol),
+                                history: [price, price, price, price, price]
+                            });
+                        }
+                    }
+                }
+
+                portfolioData = assets;
+                for (const asset of portfolioData) {
+                    const meta = marketMetaBySymbol.get((asset.symbol || '').toUpperCase());
+                    if (!meta) continue;
+                    if (typeof meta.name === 'string') asset.name = meta.name;
+                    const p = Number(meta.price);
+                    if (Number.isFinite(p)) asset.price = p;
+                    const c = Number(meta.change);
+                    if (Number.isFinite(c)) asset.change = c;
+                    asset.value = asset.holdings * asset.price;
+                    const hist = priceHistoryBySymbol.get((asset.symbol || '').toUpperCase());
+                    if (hist && hist.length > 1) {
+                        asset.history = hist.slice();
+                    } else {
+                        asset.history = [asset.price, asset.price, asset.price, asset.price, asset.price];
+                    }
+                }
+                updateTotalAssets();
+            } catch {
+                portfolioData = [];
+                updateTotalAssets();
+            }
+        }
+
+        function updateTotalAssets() {
+            const el = document.getElementById('total-assets');
+            if (el) el.textContent = String(portfolioData.length);
+        }
+
+        async function loadAccountBalance() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const backendBase = getBackendBase();
+                const res = await fetch(`${backendBase}/account`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    setupProfileNav();
+                    return;
+                }
+
+                const data = await res.json().catch(() => null);
+                if (!res.ok || !data || typeof data.cash !== 'number') return;
+
+                const navBalance = document.getElementById('nav-balance');
+                if (navBalance) navBalance.textContent = formatUsd(data.cash);
+            } catch {
+                return;
+            }
+        }
+
+        function setupProfileNav() {
+            const username = getUsernameFromToken();
+            const profileButton = document.getElementById('profile-button');
+            const profileMenu = document.getElementById('profile-menu');
+            const signin = document.getElementById('nav-signin');
+            const navWallet = document.getElementById('nav-wallet');
+
+            const mobileSignin = document.getElementById('mobile-signin');
+            const mobileProfile = document.getElementById('mobile-profile');
+            const mobileLogout = document.getElementById('mobile-logout');
+
+            if (!username) {
+                if (navWallet) navWallet.classList.add('hidden');
+                profileButton.classList.add('hidden');
+                signin.classList.remove('hidden');
+                mobileSignin.classList.remove('hidden');
+                mobileProfile.classList.add('hidden');
+                mobileLogout.classList.add('hidden');
+                const navBalance = document.getElementById('nav-balance');
+                if (navBalance) navBalance.textContent = formatUsd(0);
+                return;
+            }
+
+            signin.classList.add('hidden');
+            if (navWallet) navWallet.classList.remove('hidden');
+            profileButton.classList.remove('hidden');
+            document.getElementById('profile-initials').textContent = initialsFor(username);
+            document.getElementById('profile-username').textContent = username;
+
+            mobileSignin.classList.add('hidden');
+            mobileProfile.classList.remove('hidden');
+            mobileLogout.classList.remove('hidden');
+            document.getElementById('mobile-initials').textContent = initialsFor(username);
+            document.getElementById('mobile-username').textContent = username;
+
+            profileButton.addEventListener('click', () => {
+                profileMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                    profileMenu.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+            mobileLogout.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+        }
+
+        async function fetchAccountCash() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+            try {
+                const backendBase = getBackendBase();
+                const res = await fetch(`${backendBase}/account`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    return null;
+                }
+                const data = await res.json().catch(() => null);
+                if (!res.ok || !data || typeof data.cash !== 'number') return null;
+                return data.cash;
+            } catch {
+                return null;
+            }
+        }
+
+        async function updateTotalValue() {
+            const totalEl = document.getElementById('total-value');
+            if (!totalEl) return;
+
+            const cash = await fetchAccountCash();
+            if (typeof cash === 'number' && Number.isFinite(cash)) lastCash = cash;
+            const { totalValue } = computePortfolioTotals(cash);
+            totalEl.textContent = formatUsd(totalValue);
+            updateSummaryCards(cash);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupProfileNav();
+
+            if (initialPortfolioSnapshot) {
+                try {
+                    const meta = initialPortfolioSnapshot.marketMeta && typeof initialPortfolioSnapshot.marketMeta === 'object'
+                        ? initialPortfolioSnapshot.marketMeta
+                        : {};
+                    marketMetaBySymbol = new Map(Object.entries(meta).map(([k, v]) => [String(k).toUpperCase(), v]));
+                    portfolioData = Array.isArray(initialPortfolioSnapshot.portfolioData) ? initialPortfolioSnapshot.portfolioData : [];
+                    lastCash = (typeof initialPortfolioSnapshot.cash === 'number' && Number.isFinite(initialPortfolioSnapshot.cash)) ? initialPortfolioSnapshot.cash : null;
+                    renderAssets();
+                    const { totalValue } = computePortfolioTotals(lastCash);
+                    const totalEl = document.getElementById('total-value');
+                    if (totalEl) totalEl.textContent = formatUsd(totalValue);
+                    updateTotalAssets();
+                    updateSummaryCards(lastCash);
+                    lucide.createIcons();
+                } catch {
+                    initialPortfolioSnapshot = null;
+                }
+            }
+
+            await loadAccountBalance();
+            await loadMarketMeta();
+            await loadPortfolioFromBackend();
+            renderAssets();
+            await updateTotalValue();
+            lucide.createIcons();
+
+            setInterval(async () => {
+                await loadMarketMeta();
+                for (const asset of portfolioData) {
+                    const meta = marketMetaBySymbol.get((asset.symbol || '').toUpperCase());
+                    if (!meta) continue;
+                    if (typeof meta.name === 'string') asset.name = meta.name;
+                    const p = Number(meta.price);
+                    if (Number.isFinite(p)) asset.price = p;
+                    const c = Number(meta.change);
+                    if (Number.isFinite(c)) asset.change = c;
+                    asset.value = asset.holdings * asset.price;
+                    const hist = priceHistoryBySymbol.get((asset.symbol || '').toUpperCase());
+                    if (hist && hist.length > 1) asset.history = hist.slice();
+                }
+                renderAssets();
+                await updateTotalValue();
+                const modal = document.getElementById('asset-modal');
+                if (modal && !modal.classList.contains('hidden') && currentModalAssetId !== null) {
+                    const current = portfolioData.find(a => a.id === currentModalAssetId);
+                    if (current) updateModal(current);
+                }
+                savePortfolioSnapshot();
+                lucide.createIcons();
+            }, 2000);
+        });
+
+        // Render assets
+        function renderAssets() {
+            const container = document.getElementById('assets-list');
+            const emptyState = document.getElementById('empty-state');
+            const searchValue = document.getElementById('search-input').value.toLowerCase();
+            
+            let filtered = portfolioData.filter(asset => {
+                const matchesFilter = currentFilter === 'all' || asset.type === currentFilter;
+                const matchesSearch = asset.symbol.toLowerCase().includes(searchValue) || 
+                                    asset.name.toLowerCase().includes(searchValue);
+                return matchesFilter && matchesSearch;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                let aVal = a[sortConfig.key];
+                let bVal = b[sortConfig.key];
+                
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (sortConfig.direction === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                document.getElementById('showing-text').textContent = 'Showing 0 assets';
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            document.getElementById('showing-text').textContent = `Showing ${filtered.length} assets`;
+
+            if (currentView === 'list') {
+                renderListView(filtered, container);
+            } else {
+                renderGridView(filtered, container);
+            }
+
+            lucide.createIcons();
+        }
+
+        function renderListView(assets, container) {
+            container.className = 'divide-y divide-white/5';
+            container.innerHTML = assets.map(asset => {
+                const isPositive = asset.change >= 0;
+                const hasAvg = Number(asset.avgPrice) > 0;
+                const pnl = hasAvg ? ((asset.price - asset.avgPrice) * asset.holdings) : (asset.value * (Number(asset.change) || 0) / 100);
+                const pnlPercent = hasAvg ? ((asset.price - asset.avgPrice) / asset.avgPrice * 100) : (Number(asset.change) || 0);
+                const icon = iconForSymbol(asset.symbol);
+                
+                return `
+                    <div class="asset-row grid grid-cols-12 gap-4 px-6 py-4 items-center cursor-pointer" onclick="openModal(${asset.id})">
+                        <div class="col-span-12 md:col-span-3 flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background: ${asset.color}20; color: ${asset.color}">
+                                <i data-lucide="${icon}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white">${asset.symbol}</p>
+                                <p class="text-xs text-gray-400 md:hidden">${asset.name}</p>
+                                <p class="text-xs text-gray-500 hidden md:block">${asset.name}</p>
+                            </div>
+                        </div>
+                        <div class="col-span-6 md:col-span-2 text-right">
+                            <p class="font-medium text-white">${formatMarketPrice(asset.symbol, asset.price)}</p>
+                        </div>
+                        <div class="col-span-6 md:col-span-2 text-right">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${isPositive ? 'bg-trade-green/10 text-trade-green' : 'bg-trade-red/10 text-trade-red'}">
+                                <i data-lucide="${isPositive ? 'trending-up' : 'trending-down'}" class="w-3 h-3 mr-1"></i>
+                                ${formatSignedPercent(asset.change)}
+                            </span>
+                        </div>
+                        <div class="col-span-6 md:col-span-2 text-right md:block hidden">
+                            <p class="font-medium text-white">${formatHoldings(asset.holdings)}</p>
+                            <p class="text-xs ${pnl >= 0 ? 'text-trade-green' : 'text-trade-red'}">${formatSignedPercent(pnlPercent)}</p>
+                        </div>
+                        <div class="col-span-6 md:col-span-2 text-right">
+                            <p class="font-semibold text-white">${formatMarketPrice('USD', asset.value)}</p>
+                        </div>
+                        <div class="col-span-12 md:col-span-1 flex justify-center">
+                            <svg class="w-16 h-8" viewBox="0 0 100 40">
+                                <path d="${sparklineLineD(asset.history, 100, 40)}" 
+                                    fill="none" 
+                                    stroke="${isPositive ? '#10b981' : '#ef4444'}" 
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGridView(assets, container) {
+            container.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4';
+            container.innerHTML = assets.map(asset => {
+                const isPositive = asset.change >= 0;
+                const icon = iconForSymbol(asset.symbol);
+                
+                return `
+                    <div class="glass-card rounded-2xl p-5 cursor-pointer" onclick="openModal(${asset.id})">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold" style="background: ${asset.color}20; color: ${asset.color}">
+                                    <i data-lucide="${icon}" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-white text-lg">${asset.symbol}</p>
+                                    <p class="text-xs text-gray-400">${asset.name}</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${isPositive ? 'bg-trade-green/10 text-trade-green' : 'bg-trade-red/10 text-trade-red'}">
+                                ${formatSignedPercent(asset.change)}
+                            </span>
+                        </div>
+                        
+                        <div class="h-16 w-full mb-4">
+                            <svg class="w-full h-full" viewBox="0 0 200 60" preserveAspectRatio="none">
+                                <path d="${sparklineLineD(asset.history, 200, 60)}" 
+                                    fill="none" 
+                                    stroke="${isPositive ? '#10b981' : '#ef4444'}" 
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    opacity="0.8"/>
+                                <path d="${sparklineAreaD(asset.history, 200, 60)}" 
+                                    fill="${isPositive ? '#10b981' : '#ef4444'}" 
+                                    opacity="0.1"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Holdings</p>
+                                <p class="font-semibold text-white">${formatHoldings(asset.holdings)} ${asset.symbol}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400 mb-1">Value</p>
+                                <p class="font-bold text-white text-lg">${formatMarketPrice('USD', asset.value)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter functions
+        function filterAssets(type, btn) {
+            currentFilter = type;
+            
+            // Update active state
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.remove('text-trade-accent');
+                b.classList.add('text-gray-300');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('text-gray-300');
+            
+            renderAssets();
+        }
+
+        function searchAssets(query) {
+            renderAssets();
+        }
+
+        function sortAssets(key) {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'desc';
+            }
+            renderAssets();
+        }
+
+        function toggleView() {
+            currentView = currentView === 'list' ? 'grid' : 'list';
+            const icon = document.getElementById('view-icon');
+            icon.setAttribute('data-lucide', currentView === 'list' ? 'layout-grid' : 'list');
+            lucide.createIcons();
+            renderAssets();
+        }
+
+        function toggleSort() {
+            const keys = ['name', 'value', 'change', 'price'];
+            const currentIndex = keys.indexOf(sortConfig.key);
+            const nextIndex = (currentIndex + 1) % keys.length;
+            sortAssets(keys[nextIndex]);
+        }
+
+        // Modal functions
+        let currentModalAssetId = null;
+
+        function goToTrade(symbol, side) {
+            const sym = (symbol || '').toString();
+            if (!sym) return;
+            try {
+                localStorage.setItem('tradeSymbol', sym);
+                localStorage.setItem('tradeSide', (side === 'sell') ? 'sell' : 'buy');
+            } catch {
+                return;
+            }
+            const url = `trade.html?symbol=${encodeURIComponent(sym)}&side=${encodeURIComponent((side === 'sell') ? 'sell' : 'buy')}`;
+            window.location.href = url;
+        }
+
+        function updateModal(asset) {
+            // Populate data
+            document.getElementById('modal-name').textContent = asset.name;
+            document.getElementById('modal-symbol').textContent = asset.symbol;
+            document.getElementById('modal-price').textContent = formatMarketPrice(asset.symbol, asset.price);
+            
+            const changeEl = document.getElementById('modal-change');
+            const isPositive = asset.change >= 0;
+            changeEl.textContent = formatSignedPercent(asset.change);
+            changeEl.className = 'text-lg font-medium ' + (isPositive ? 'text-trade-green' : 'text-trade-red');
+            
+            document.getElementById('modal-holdings').textContent = formatHoldings(asset.holdings) + ' ' + asset.symbol;
+            document.getElementById('modal-value').textContent = formatMarketPrice('USD', asset.value);
+            document.getElementById('modal-avg-price').textContent = Number(asset.avgPrice) > 0 ? formatMarketPrice('USD', asset.avgPrice) : '-';
+            
+            const hasAvg = Number(asset.avgPrice) > 0;
+            const pnl = hasAvg ? ((asset.price - asset.avgPrice) * asset.holdings) : (asset.value * (Number(asset.change) || 0) / 100);
+            const pnlEl = document.getElementById('modal-pnl');
+            pnlEl.textContent = (pnl >= 0 ? '+' : '') + formatMarketPrice('USD', Math.abs(pnl));
+            pnlEl.className = 'text-lg font-semibold ' + (pnl >= 0 ? 'text-trade-green' : 'text-trade-red');
+
+            const buyBtn = document.getElementById('modal-buy-more');
+            const sellBtn = document.getElementById('modal-sell');
+            if (buyBtn) buyBtn.onclick = () => goToTrade(asset.symbol, 'buy');
+            if (sellBtn) sellBtn.onclick = () => goToTrade(asset.symbol, 'sell');
+            
+            // Icon
+            const iconEl = document.getElementById('modal-icon');
+            iconEl.innerHTML = `<i data-lucide="${iconForSymbol(asset.symbol)}" class="w-8 h-8"></i>`;
+            iconEl.style.background = asset.color + '30';
+            iconEl.style.color = asset.color;
+            
+            // Chart
+            const path = document.getElementById('modal-chart-path');
+            const points = asset.history.map((val, i) => {
+                const x = (i / (asset.history.length - 1)) * 300;
+                const min = Math.min(...asset.history);
+                const max = Math.max(...asset.history);
+                const denom = (max - min) || 1;
+                const y = 100 - (((val - min) / denom) * 80 + 10);
+                return `${x},${y}`;
+            }).join(' ');
+            path.setAttribute('d', 'M' + points);
+            path.setAttribute('stroke', isPositive ? '#10b981' : '#ef4444');
+
+            lucide.createIcons();
+        }
+
+        function openModal(assetId) {
+            const asset = portfolioData.find(a => a.id === assetId);
+            if (!asset) return;
+            currentModalAssetId = assetId;
+
+            const modal = document.getElementById('asset-modal');
+            const content = document.getElementById('modal-content');
+            
+            updateModal(asset);
+            
+            // Show modal
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('asset-modal');
+            const content = document.getElementById('modal-content');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                currentModalAssetId = null;
+            }, 300);
+        }
+
+        // Mobile menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Refresh animation
+        function refreshData() {
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+            icon.classList.add('animate-spin');
+            
+            setTimeout(async () => {
+                await loadPortfolioFromBackend();
+                renderAssets();
+                await updateTotalValue();
+                icon.classList.remove('animate-spin');
+            }, 300);
+        }
+
+        // Mouse parallax
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            
+            document.querySelectorAll('.glow-bg').forEach((glow, index) => {
+                const factor = index === 0 ? 1 : -1;
+                glow.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+            if (e.key === '/' && document.activeElement.id !== 'search-input') {
+                e.preventDefault();
+                document.getElementById('search-input').focus();
+            }
+        });
+    </script>
+</body>
+</html>
