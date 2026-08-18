@@ -1,5 +1,5 @@
 # TradingSystem
-Computer Networking - Assignment 5
+Repository of Computer Networking Project
 
 ## Overview
 TradingSystem is a simple online trading platform prototype implemented as two native C++ applications:
