@@ -45,4 +45,8 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   target_compile_features(Backend PRIVATE cxx_std_20)
 endif()
 
-# TODO: Add tests and install targets if needed.
+# Tests and benchmarks (see Backend/tests/README.md).
+# Kept out of src/ so their main() functions do not collide with Main.cpp above.
+add_subdirectory("tests")
+
+# TODO: Add install targets if needed.
