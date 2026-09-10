@@ -144,7 +144,11 @@ namespace services
 
     if (user_id != market_maker)
     {
-      db_.upsert_account(market_maker, 1.0e12);
+      // Seed the market maker once rather than rewriting the same balance on every
+      // order -- an unconditional write here cost a durable commit per order.
+      if (!db_.get_cash(market_maker))
+        db_.upsert_account(market_maker, 1.0e12);
+
       const auto mm_held = db_.get_holdings(market_maker, symbol).value_or(0.0);
       if (mm_held < qty)
       {

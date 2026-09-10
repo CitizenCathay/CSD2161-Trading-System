@@ -127,7 +127,22 @@ namespace database
       "  qty           REAL    NOT NULL,"
       "  price         REAL    NOT NULL,"
       "  timestamp     INTEGER NOT NULL"
-      ");";
+      ");"
+
+      // The matching loop re-runs get_open_orders() after every fill.  Without an index
+      // that is a full scan of the whole orders table -- and because filled orders are
+      // never archived, the scan grows with total history, not with book depth.  This
+      // index keeps the scan proportional to the number of *open* orders instead.
+      "CREATE INDEX IF NOT EXISTS idx_orders_book "
+      "  ON orders(symbol, status, side, price, arrival);"
+
+      // Supports get_orders_by_user (user's order history).
+      "CREATE INDEX IF NOT EXISTS idx_orders_user "
+      "  ON orders(user_id, arrival DESC);"
+
+      // Supports get_trade_history (recent trades for a symbol).
+      "CREATE INDEX IF NOT EXISTS idx_trades_symbol_time "
+      "  ON trades(symbol, timestamp DESC);";
 
     char* err = nullptr;
     const int init_rc = sqlite3_exec(db, init_sql, nullptr, nullptr, &err);

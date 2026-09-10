@@ -11,6 +11,9 @@ endif()
 
 project ("TradingSystem")
 
+# Enables `ctest` from the build directory; tests are defined in Backend/tests.
+enable_testing()
+
 # Include sub-projects.
 add_subdirectory ("Frontend")
 add_subdirectory ("Backend")
